@@ -1,0 +1,59 @@
+name: Auto-add issues to Project 6
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  add-to-project:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: read
+      contents: read
+    steps:
+      - name: Add issue to project and set status to Inbox
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const projectId = "PVT_kwDOBl2kVs4A1N7N";
+            const statusFieldId = "PVTSSF_lADOBl2kVs4A1N7NzgquUAs";
+            const inboxOptionId = "88157179";
+            const itemId = context.payload.issue.node_id;
+
+            const addResp = await github.graphql(`
+              mutation($projectId: ID!, $itemId: ID!) {
+                addProjectV2ItemById(input: {
+                  projectId: $projectId,
+                  contentId: $itemId
+                }) {
+                  item {
+                    id
+                  }
+                }
+              }
+            `, { projectId, itemId });
+
+            const projectItemId = addResp.addProjectV2ItemById.item.id;
+
+            await github.graphql(`
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId,
+                  itemId: $itemId,
+                  fieldId: $fieldId,
+                  value: {
+                    singleSelectOptionId: $optionId
+                  }
+                }) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }
+            `, {
+              projectId,
+              itemId: projectItemId,
+              fieldId: statusFieldId,
+              optionId: inboxOptionId
+            });

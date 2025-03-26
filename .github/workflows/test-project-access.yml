@@ -2,7 +2,9 @@ name: Trigger Project Access
 
 on:
   workflow_dispatch:  # Lets you trigger it manually
-
+  issues:
+    types: [opened]  
+    
 jobs:
   test-access:
     runs-on: ubuntu-latest

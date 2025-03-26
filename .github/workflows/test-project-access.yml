@@ -16,7 +16,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const projectId = "PVT_kwHOAPZ6UM4A1N5s";  // Replace with actual projectId
-            const itemId = "DUMMY_ID";
+            const itemId = context.payload.issue.node_id;
 
             await github.graphql(`
               mutation($projectId: ID!, $itemId: ID!) {

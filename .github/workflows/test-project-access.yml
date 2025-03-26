@@ -1,0 +1,32 @@
+name: Trigger Project Access
+
+on:
+  workflow_dispatch:  # Lets you trigger it manually
+
+jobs:
+  test-access:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+    steps:
+      - name: Try to add issue to org-level project
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const projectId = "YOUR_PROJECT_ID";  // Replace with actual projectId
+            const itemId = "DUMMY_ID";
+
+            await github.graphql(`
+              mutation($projectId: ID!, $itemId: ID!) {
+                addProjectV2ItemById(input: {
+                  projectId: $projectId,
+                  contentId: $itemId
+                }) {
+                  item {
+                    id
+                  }
+                }
+              }
+            `, { projectId, itemId });
